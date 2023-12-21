@@ -1,0 +1,37 @@
+version: '2.1'
+
+services:
+    nginx-proxy:
+        build: ./nginx-proxy
+        image: nginx-proxy
+        restart: 'always'
+        ports:
+            - 80:80
+        volumes:
+            - /var/run/docker.sock:/tmp/docker.sock:ro
+        environment:
+            - HTTPS_METHOD=nohttps
+
+    jupyter:
+        build: .
+        image: jupyter:latest
+        restart: 'no'
+#       ports:
+#           - 8080:8080
+        expose:
+            - 8080
+        volumes:
+            - ./jupyter:/var/jupyter
+        environment:
+            - VIRTUAL_HOST=192.168.0.100
+            - VIRTUAL_PORT=8080
+            - HTTPS_METHOD=nohttps
+        deploy:
+            replicas: 2
+
+networks:
+  default:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.16.57.0/24
